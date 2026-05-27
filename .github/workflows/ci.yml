@@ -59,37 +59,6 @@ jobs:
       - name: Integration tests
         run: make test-integration
 
-      - name: Show created resources
-        if: always()
-        run: |
-          NS="integration-test"
-          echo "=== Deployments in ${NS} ==="
-          kubectl get deployments -n "${NS}" -o wide 2>/dev/null || true
-          echo ""
-          echo "=== Pods in ${NS} ==="
-          kubectl get pods -n "${NS}" -o wide 2>/dev/null || true
-          echo ""
-          echo "=== Services in ${NS} ==="
-          kubectl get services -n "${NS}" -o wide 2>/dev/null || true
-          echo ""
-          echo "=== ConfigMaps in ${NS} ==="
-          kubectl get configmaps -n "${NS}" 2>/dev/null || true
-          echo ""
-          echo "=== ServiceAccounts in ${NS} ==="
-          kubectl get serviceaccounts -n "${NS}" 2>/dev/null || true
-          echo ""
-          echo "=== ClusterRoles (aigateway) ==="
-          kubectl get clusterroles -l platform.opendatahub.io/part-of=aigateway 2>/dev/null || true
-          echo ""
-          echo "=== ClusterRoleBindings (aigateway) ==="
-          kubectl get clusterrolebindings -l platform.opendatahub.io/part-of=aigateway 2>/dev/null || true
-          echo ""
-          echo "=== CRDs (batch.llm-d.ai) ==="
-          kubectl get crds -l platform.opendatahub.io/part-of=aigateway 2>/dev/null || true
-          echo ""
-          echo "=== AIGateway CR ==="
-          kubectl get aigateways.components.platform.opendatahub.io -o yaml 2>/dev/null || true
-
   e2e:
     permissions:
       contents: read
@@ -129,42 +98,6 @@ jobs:
 
       - name: Run E2E tests
         run: make test-e2e IMG=${{ steps.img.outputs.img }}
-
-      - name: Show created resources
-        if: always()
-        run: |
-          NS="opendatahub-ai-gateway-system"
-          echo "=== Module operator ==="
-          echo "--- Deployment ---"
-          kubectl get deployment -n "${NS}" -o wide 2>/dev/null || true
-          echo "--- Pods ---"
-          kubectl get pods -n "${NS}" -o wide 2>/dev/null || true
-          echo ""
-          echo "=== Batch-gateway operator resources ==="
-          echo "--- Deployments ---"
-          kubectl get deployment batch-gw-operator-controller-manager -n "${NS}" -o wide 2>/dev/null || true
-          echo "--- Pods ---"
-          kubectl get pods -n "${NS}" -l app.kubernetes.io/name=batch-gw-operator -o wide 2>/dev/null || true
-          echo "--- Services ---"
-          kubectl get services -n "${NS}" 2>/dev/null || true
-          echo "--- ServiceAccounts ---"
-          kubectl get serviceaccounts -n "${NS}" 2>/dev/null || true
-          echo "--- ConfigMaps ---"
-          kubectl get configmaps -n "${NS}" 2>/dev/null || true
-          echo ""
-          echo "=== Cluster-scoped resources ==="
-          echo "--- ClusterRoles (aigateway) ---"
-          kubectl get clusterroles -l platform.opendatahub.io/part-of=aigateway 2>/dev/null || true
-          echo "--- ClusterRoleBindings (aigateway) ---"
-          kubectl get clusterrolebindings -l platform.opendatahub.io/part-of=aigateway 2>/dev/null || true
-          echo "--- Batch-gateway ClusterRole ---"
-          kubectl get clusterrole batch-gw-operator-manager-role -o wide 2>/dev/null || true
-          echo "--- CRDs ---"
-          kubectl get crds llmbatchgateways.batch.llm-d.ai 2>/dev/null || true
-          kubectl get crds aigateways.components.platform.opendatahub.io 2>/dev/null || true
-          echo ""
-          echo "=== AIGateway CR status ==="
-          kubectl get aigateways.components.platform.opendatahub.io -o yaml 2>/dev/null || true
 
       - name: Show pod logs on failure
         if: failure()

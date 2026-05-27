@@ -245,6 +245,7 @@ func TestAIGateway(t *testing.T) {
 	t.Run("should have module CRD installed", rt.testModuleCRDInstalled)
 	t.Run("should become ready", rt.testBecomesReady)
 	t.Run("should deploy batch-gateway operator", rt.testBatchGatewayDeployed)
+	t.Run("should show deployed resources", rt.testShowResources)
 	t.Run("should report module version and platform", rt.testModuleStatus)
 	t.Run("should set owner references on workload", rt.testOwnerReferences)
 }
@@ -293,6 +294,38 @@ func (rt *aiGatewayTest) testBatchGatewayDeployed(t *testing.T) {
 	g.Eventually(k.Get(rt.workloadDeploy)).WithContext(ctx).WithTimeout(timeout).WithPolling(interval).Should(
 		jq.Match(`.status.readyReplicas >= 1`),
 	)
+}
+
+func (rt *aiGatewayTest) testShowResources(t *testing.T) {
+	g := NewWithT(t)
+	ns := rt.workloadDeploy.Namespace
+
+	var deployList appsv1.DeploymentList
+	g.Expect(k8sClient.List(ctx, &deployList, client.InNamespace(ns))).To(Succeed())
+
+	t.Logf("Deployments in %s:", ns)
+	for i := range deployList.Items {
+		d := &deployList.Items[i]
+		t.Logf("  %-50s ready=%d/%d image=%s",
+			d.Name,
+			d.Status.ReadyReplicas,
+			*d.Spec.Replicas,
+			d.Spec.Template.Spec.Containers[0].Image,
+		)
+	}
+
+	var podList corev1.PodList
+	g.Expect(k8sClient.List(ctx, &podList, client.InNamespace(ns))).To(Succeed())
+
+	t.Logf("Pods in %s:", ns)
+	for i := range podList.Items {
+		p := &podList.Items[i]
+		t.Logf("  %-50s %s  node=%s",
+			p.Name,
+			string(p.Status.Phase),
+			p.Spec.NodeName,
+		)
+	}
 }
 
 func (rt *aiGatewayTest) testOwnerReferences(t *testing.T) {
