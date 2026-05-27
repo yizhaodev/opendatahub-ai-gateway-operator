@@ -134,4 +134,6 @@ batch-gateway-operator-controller-manager   1/1     1            1
 
 - [FeatureRefinement - RHAISTRAT-1064 - Implement Modular Architecture for ODH Operator](https://docs.google.com/document/d/1qGvaUsioOXl1MPm0TqSxaYR6booRyDLxz_-wTYVF8hM/edit?tab=t.3mrf1syv46a)
 - [Onboarding Guide for ODH Operator Modules](https://docs.google.com/document/d/1FgN_U-6XH8M-Mu6XNeldUlTPsnw7UyPCWg5NVJJdYnw/edit?usp=sharing)
+- [Module Handler Developer Guide](https://gitlab.cee.redhat.com/data-hub/odh-modularisation-docs/-/blob/main/Module%20Handler%20Developer%20Guide.md?ref_type=heads)
 - [opendatahub-module-operator](https://github.com/lburgazzoli/opendatahub-module-operator)
+- [odh-platform-utilities](https://github.com/opendatahub-io/odh-platform-utilities)
