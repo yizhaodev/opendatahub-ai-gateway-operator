@@ -53,17 +53,24 @@ Each sub-component operator (e.g. batch-gateway-operator) lives in its own upstr
 - **RBAC** (`rbac/`) — ClusterRole, ClusterRoleBinding, ServiceAccount, leader election role.
 - **Overlays** (`overlays/odh/`, `overlays/rhoai/`) — platform-specific kustomize overlays for ODH and RHOAI.
 
-### 2.2 ai-gateway-operator generates RBAC and Helm chart
+### 2.2 ai-gateway-operator fetches sub-component manifests
 
-- Run `make get-manifests` (`hack/scripts/get-manifests.sh`) will fetch the repo's kustomize manifests at a pinned commit SHA and copies them into `config/manifests/batchgateway/`. These files are checked in and used at runtime by the controller. Upgrading a sub-component is an explicit "bump SHA" commit in `get-manifests.sh`.
+`make get-manifests` (`hack/scripts/get-manifests.sh`) fetches each sub-component's manifests from its upstream repo at a pinned commit SHA and copies them into `config/manifests/<component>/` (e.g. `config/manifests/batchgateway/`).
+- The fetched files must be committed to git so that PR review can catch manifest changes and container builds remain reproducible without network access.
+- At build time, `Containerfile` copies these manifests into the container image at `/manifests/` for the controller to use at runtime.
+- To upgrade a sub-component, update the SHA in `get-manifests.sh`, re-run `make get-manifests`, and commit the result.
 
-- Run `make manifests` generates `config/rbac/role.yaml` from these markers.
+### 2.3 ai-gateway-operator generates RBAC and Helm chart
 
-- Run `make helm` (`cmd/chartgen`), which reads the kustomize overlay (`config/default/`) and picks up `config/rbac/role.yaml`, CRDs, Deployment, ConfigMap, etc. The output is written to `config/chart/`, checked in, and consumed directly by opendatahub-operator.
+`make manifests` generates `config/rbac/role.yaml` from kubebuilder RBAC markers in `aigateway_controller.go`. These markers must include permissions for all sub-component workloads (RBAC escalation).
 
-### 2.3 opendatahub-operator consumes the Helm chart
+`make helm` (`cmd/chartgen`) reads the kustomize overlay (`config/default/`) and picks up `config/rbac/role.yaml`, CRDs, Deployment, ConfigMap, etc. The output is written to `config/chart/` and must be committed to git. opendatahub-operator's build process fetches this chart from our repo at a pinned commit (see 2.4).
 
-opendatahub-operator's `get_all_manifests.sh` downloads each module's Helm chart from its repo at a pinned commit SHA (configured in `ODH_COMPONENT_CHARTS` / `RHOAI_COMPONENT_CHARTS` maps). The downloaded charts are bundled into the opendatahub-operator container image at `/opt/charts/`. At runtime, the modules controller reads charts from this path (`DEFAULT_CHARTS_PATH=/opt/charts`) to render and deploy module operators via SSA.
+### 2.4 opendatahub-operator consumes the Helm chart
+
+During opendatahub-operator's build, `get_all_manifests.sh` downloads each module's Helm chart from its repo at a pinned commit SHA (configured in `ODH_COMPONENT_CHARTS` / `RHOAI_COMPONENT_CHARTS` maps). The downloaded charts are bundled into the opendatahub-operator container image at `/opt/charts/`. 
+
+At runtime, the modules controller reads charts from this path (`DEFAULT_CHARTS_PATH=/opt/charts`) to render and deploy module operators via SSA.
 
 ## 3. Reconciliation flow
 
@@ -85,7 +92,7 @@ spec:
 
 ### 3.2 opendatahub-operator → ai-gateway-operator
 2. opendatahub-operator watches the `DataScienceCluster` CR and sees `aigateway` set to `Managed`.
-3. opendatahub-operator renders the ai-gateway-operator Helm chart (from `config/chart/`) and deploys it via SSA:
+3. opendatahub-operator renders the ai-gateway-operator Helm chart (bundled at `/opt/charts/` in its container image) and deploys it via SSA:
 
 ```bash
 $ oc get deployment -n opendatahub -l app.kubernetes.io/name=opendatahub-ai-gateway-operator
@@ -115,7 +122,7 @@ NAME                                        READY   UP-TO-DATE   AVAILABLE
 batch-gateway-operator-controller-manager   1/1     1            1
 ```
 
-7. ai-gateway-operator updates `AIGateway` CR status (phase: Ready, conditions, etc.).
+7. ai-gateway-operator updates `AIGateway` CR status with required conditions (`Ready`, `ProvisioningSucceeded`, `Degraded`) and `observedGeneration`. opendatahub-operator reads this status to aggregate into the DSC.
 8. batch-gateway-operator starts running and watches `LLMBatchGateway` CRD.
 
 ### 3.4 sub-component operators → workload
@@ -123,7 +130,7 @@ batch-gateway-operator-controller-manager   1/1     1            1
 10. batch-gateway-operator watches `LLMBatchGateway` CR and deploys batch-gateway workloads.
 
 
-## 5. References
+## 4. References
 
 - [FeatureRefinement - RHAISTRAT-1064 - Implement Modular Architecture for ODH Operator](https://docs.google.com/document/d/1qGvaUsioOXl1MPm0TqSxaYR6booRyDLxz_-wTYVF8hM/edit?tab=t.3mrf1syv46a)
 - [Onboarding Guide for ODH Operator Modules](https://docs.google.com/document/d/1FgN_U-6XH8M-Mu6XNeldUlTPsnw7UyPCWg5NVJJdYnw/edit?usp=sharing)
