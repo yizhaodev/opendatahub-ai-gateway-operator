@@ -22,6 +22,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -227,13 +228,15 @@ func (rt *aiGatewayE2ETest) testShowResources(t *testing.T) {
 	g := NewWithT(t)
 	ns := rt.operatorDeploy.Namespace
 
+	var sb strings.Builder
+
 	var deployList appsv1.DeploymentList
 	g.Expect(k8sClient.List(ctx, &deployList, client.InNamespace(ns))).To(Succeed())
 
-	t.Logf("Deployments in %s:", ns)
+	fmt.Fprintf(&sb, "Deployments in %s:\n", ns)
 	for i := range deployList.Items {
 		d := &deployList.Items[i]
-		t.Logf("  %-50s ready=%d/%d image=%s",
+		fmt.Fprintf(&sb, "  %-50s ready=%d/%d image=%s\n",
 			d.Name,
 			d.Status.ReadyReplicas,
 			*d.Spec.Replicas,
@@ -244,16 +247,17 @@ func (rt *aiGatewayE2ETest) testShowResources(t *testing.T) {
 	var podList corev1.PodList
 	g.Expect(k8sClient.List(ctx, &podList, client.InNamespace(ns))).To(Succeed())
 
-	t.Logf("Pods in %s:", ns)
+	fmt.Fprintf(&sb, "Pods in %s:\n", ns)
 	for i := range podList.Items {
 		p := &podList.Items[i]
-		phase := string(p.Status.Phase)
-		t.Logf("  %-50s %s  node=%s",
+		fmt.Fprintf(&sb, "  %-50s %-10s node=%s\n",
 			p.Name,
-			phase,
+			p.Status.Phase,
 			p.Spec.NodeName,
 		)
 	}
+
+	t.Log("\n" + sb.String())
 }
 
 func (rt *aiGatewayE2ETest) testPlatformLabels(t *testing.T) {
