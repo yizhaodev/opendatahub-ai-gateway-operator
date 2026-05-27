@@ -33,9 +33,6 @@ const (
 	componentName = componentApi.AIGatewayComponentName
 )
 
-// TODO: remove hardcoded image once quay.io/opendatahub/odh-batch-gateway-operator is published
-const batchGatewayImage = "ghcr.io/opendatahub-io/batch-gateway-operator:main"
-
 var batchGatewayImageParamMap = map[string]string{
 	"BATCH_GATEWAY_OPERATOR_IMAGE": "RELATED_IMAGE_ODH_BATCH_GATEWAY_OPERATOR_IMAGE",
 }
@@ -60,10 +57,7 @@ func NewModule(cfg *moduleconfig.Config) (*Module, error) {
 		SourcePath: "base",
 	}
 
-	// TODO: remove hardcoded image override once quay.io/opendatahub/odh-batch-gateway-operator is published
-	if err := odhdeploy.ApplyParams(batchMI.String(), "params.env", batchGatewayImageParamMap, map[string]string{
-		"BATCH_GATEWAY_OPERATOR_IMAGE": batchGatewayImage,
-	}); err != nil {
+	if err := odhdeploy.ApplyParams(batchMI.String(), "params.env", batchGatewayImageParamMap, nil); err != nil {
 		return nil, fmt.Errorf("failed to update images on path %s: %w", batchMI, err)
 	}
 

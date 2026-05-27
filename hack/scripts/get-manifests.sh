@@ -41,4 +41,9 @@ sed -i.bak 's/name: manager-role/name: batch-gateway-operator-manager-role/' \
     "${DST_MANIFESTS_DIR}/rbac/role.yaml"
 rm -f "${DST_MANIFESTS_DIR}/rbac/role.yaml.bak"
 
+# TODO: remove once quay.io/opendatahub/odh-batch-gateway-operator is published
+sed -i.bak 's|BATCH_GATEWAY_OPERATOR_IMAGE=.*|BATCH_GATEWAY_OPERATOR_IMAGE=ghcr.io/opendatahub-io/batch-gateway-operator:main|' \
+    "${DST_MANIFESTS_DIR}/base/params.env"
+rm -f "${DST_MANIFESTS_DIR}/base/params.env.bak"
+
 echo "Manifests downloaded to ${DST_MANIFESTS_DIR}"
