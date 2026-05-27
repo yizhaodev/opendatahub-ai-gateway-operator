@@ -22,6 +22,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	apiextensionsv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	ctrl "sigs.k8s.io/controller-runtime"
 
 	componentApi "github.com/yizhaodev/opendatahub-ai-gateway-operator/api/components/v1alpha1"
@@ -68,6 +69,7 @@ func NewReconciler(
 		Owns(&rbacv1.Role{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&corev1.Service{}).
+		Owns(&apiextensionsv1.CustomResourceDefinition{}).
 		Owns(&appsv1.Deployment{}, reconciler.WithPredicates(predicates.DefaultDeploymentPredicate)).
 		WithAction(m.initialize).
 		WithAction(m.upgradeIfNeeded).

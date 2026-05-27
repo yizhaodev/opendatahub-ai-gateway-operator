@@ -33,4 +33,11 @@ rm -rf "${DST_MANIFESTS_DIR}"
 mkdir -p "${DST_MANIFESTS_DIR}"
 cp -a "${TMP_DIR}/${SOURCE_PATH}/." "${DST_MANIFESTS_DIR}/"
 
+# Fix upstream name mismatch: ClusterRole "manager-role" must match
+# ClusterRoleBinding roleRef "batch-gw-operator-manager-role".
+# The default/ overlay applies namePrefix but base/ does not.
+sed -i.bak 's/name: manager-role/name: batch-gw-operator-manager-role/' \
+    "${DST_MANIFESTS_DIR}/rbac/role.yaml"
+rm -f "${DST_MANIFESTS_DIR}/rbac/role.yaml.bak"
+
 echo "Manifests downloaded to ${DST_MANIFESTS_DIR}"
