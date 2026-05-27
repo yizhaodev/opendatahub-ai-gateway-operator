@@ -8,7 +8,6 @@ permissions: {}
 
 env:
   CONTAINER_TOOL: docker
-  CI_IMG: localhost/ai-gateway-operator:ci
 
 jobs:
   lint:
@@ -113,20 +112,23 @@ jobs:
         with:
           cluster_name: kind
 
-      - name: Build container image
-        run: make container-build IMG="${CI_IMG}"
+      - name: Compute image reference
+        id: img
+        run: |
+          IMG="ttl.sh/opendatahub-ai-gateway-operator-${GITHUB_SHA::7}:1h"
+          echo "img=${IMG}" >> "$GITHUB_OUTPUT"
+          echo "Using image: ${IMG}"
 
-      - name: Load image into Kind
-        run: kind load docker-image "${CI_IMG}" --name kind
+      - name: Build and push image
+        run: |
+          make container-build IMG=${{ steps.img.outputs.img }}
+          make container-push IMG=${{ steps.img.outputs.img }}
 
       - name: Generate Helm chart
         run: make helm
 
       - name: Run E2E tests
-        run: |
-          make test-e2e \
-            IMG="${CI_IMG}" \
-            HELM_EXTRA_ARGS="--set-string image.pullPolicy=IfNotPresent"
+        run: make test-e2e IMG=${{ steps.img.outputs.img }}
 
       - name: Show created resources
         if: always()

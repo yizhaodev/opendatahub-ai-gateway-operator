@@ -77,11 +77,29 @@ rules:
 - apiGroups:
   - ""
   resources:
-  - events
+  - configmaps
+  - serviceaccounts
+  - services
   verbs:
   - create
+  - delete
+  - get
+  - list
   - patch
+  - update
+  - watch
 - apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - create
+  - get
+  - list
+  - patch
+  - watch
+- apiGroups:
+  - ""
   - events.k8s.io
   resources:
   - events
@@ -89,12 +107,21 @@ rules:
   - create
   - patch
 - apiGroups:
-  - ""
+  - apiextensions.k8s.io
   resources:
-  - configmaps
-  - secrets
-  - serviceaccounts
-  - services
+  - customresourcedefinitions
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
   verbs:
   - create
   - delete
@@ -140,6 +167,32 @@ rules:
   - update
   - watch
 - apiGroups:
+  - components.platform.opendatahub.io
+  resources:
+  - aigateways
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - components.platform.opendatahub.io
+  resources:
+  - aigateways/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - components.platform.opendatahub.io
+  resources:
+  - aigateways/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
   - gateway.networking.k8s.io
   resources:
   - httproutes
@@ -173,65 +226,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - apps
-  resources:
-  - deployments
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - components.platform.opendatahub.io
-  resources:
-  - aigateways
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
-  - components.platform.opendatahub.io
-  resources:
-  - aigateways/finalizers
-  verbs:
-  - update
-- apiGroups:
-  - components.platform.opendatahub.io
-  resources:
-  - aigateways/status
-  verbs:
-  - get
-  - patch
-  - update
-- apiGroups:
-  - coordination.k8s.io
-  resources:
-  - leases
-  verbs:
-  - create
-  - get
-  - list
-  - update
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:

@@ -33,12 +33,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
+	"github.com/opendatahub-io/opendatahub-operator/v2/pkg/cluster"
+	odhmanager "github.com/opendatahub-io/opendatahub-operator/v2/pkg/manager"
 	componentsv1alpha1 "github.com/yizhaodev/opendatahub-ai-gateway-operator/api/components/v1alpha1"
 	"github.com/yizhaodev/opendatahub-ai-gateway-operator/internal/controller/aigateway"
 	libcache "github.com/yizhaodev/opendatahub-ai-gateway-operator/pkg/cache"
 	moduleconfig "github.com/yizhaodev/opendatahub-ai-gateway-operator/pkg/config"
-	"github.com/opendatahub-io/opendatahub-operator/v2/pkg/cluster"
-	odhmanager "github.com/opendatahub-io/opendatahub-operator/v2/pkg/manager"
 )
 
 const (

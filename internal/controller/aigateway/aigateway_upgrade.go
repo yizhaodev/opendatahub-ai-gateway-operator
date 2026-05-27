@@ -20,8 +20,8 @@ import (
 	"context"
 	"fmt"
 
-	componentApi "github.com/yizhaodev/opendatahub-ai-gateway-operator/api/components/v1alpha1"
 	odhtypes "github.com/opendatahub-io/opendatahub-operator/v2/pkg/controller/types"
+	componentApi "github.com/yizhaodev/opendatahub-ai-gateway-operator/api/components/v1alpha1"
 )
 
 func (m *Module) upgradeIfNeeded(ctx context.Context, rr *odhtypes.ReconciliationRequest) error {
