@@ -13,6 +13,10 @@
         },
         "fullRef": {
           "type": "string"
+        },
+        "pullPolicy": {
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
         }
       },
       "additionalProperties": false,
