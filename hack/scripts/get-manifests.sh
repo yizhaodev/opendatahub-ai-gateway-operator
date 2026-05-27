@@ -10,7 +10,7 @@ SOURCE_PATH="config"
 DST_MANIFESTS_DIR="${PROJECT_ROOT}/config/manifests/${COMPONENT_NAME}"
 
 REPO_URL="https://github.com/opendatahub-io/${REPO_NAME}"
-COMMIT_SHA="42fc1a7f9d4efc00606e97c1f0ca7a40c2704dea"
+COMMIT_SHA="e762e41d88fc128d0911f5811a945573ce87d1ea"
 
 if [[ "${USE_LOCAL:-}" == "true" ]] && [[ -d "${PROJECT_ROOT}/../${REPO_NAME}" ]]; then
     echo "Copying manifests from adjacent ${REPO_NAME} checkout"
@@ -35,9 +35,9 @@ cp -a "${TMP_DIR}/${SOURCE_PATH}/." "${DST_MANIFESTS_DIR}/"
 
 # TODO
 # Fix upstream name mismatch: ClusterRole "manager-role" must match
-# ClusterRoleBinding roleRef "batch-gw-operator-manager-role".
+# ClusterRoleBinding roleRef "batch-gateway-operator-manager-role".
 # The default/ overlay applies namePrefix but base/ does not.
-sed -i.bak 's/name: manager-role/name: batch-gw-operator-manager-role/' \
+sed -i.bak 's/name: manager-role/name: batch-gateway-operator-manager-role/' \
     "${DST_MANIFESTS_DIR}/rbac/role.yaml"
 rm -f "${DST_MANIFESTS_DIR}/rbac/role.yaml.bak"
 
