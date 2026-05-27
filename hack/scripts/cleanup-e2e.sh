@@ -6,7 +6,7 @@ PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 NAMESPACE="${1:-opendatahub-ai-gateway-system}"
 HELM_RELEASE="${2:-opendatahub-ai-gateway-operator}"
-CR_RESOURCE="rays.components.platform.opendatahub.io"
+CR_RESOURCE="aigateways.components.platform.opendatahub.io"
 
 echo "Cleaning up e2e test resources..."
 
@@ -24,8 +24,8 @@ go run helm.sh/helm/v4/cmd/helm@v4.2.0 uninstall "${HELM_RELEASE}" \
 kubectl delete namespace "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
 
 # Delete any leftover cluster-scoped resources
-kubectl delete clusterroles -l platform.opendatahub.io/part-of=ray --ignore-not-found 2>/dev/null || true
-kubectl delete clusterrolebindings -l platform.opendatahub.io/part-of=ray --ignore-not-found 2>/dev/null || true
+kubectl delete clusterroles -l platform.opendatahub.io/part-of=aigateway --ignore-not-found 2>/dev/null || true
+kubectl delete clusterrolebindings -l platform.opendatahub.io/part-of=aigateway --ignore-not-found 2>/dev/null || true
 
 # Delete CRD if still present (Helm should have removed it)
 kubectl delete crd "${CR_RESOURCE}" --ignore-not-found 2>/dev/null || true

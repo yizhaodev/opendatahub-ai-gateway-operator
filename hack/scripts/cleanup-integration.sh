@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 
 NAMESPACE="${1:-integration-test}"
-CR_RESOURCE="rays.components.platform.opendatahub.io"
+CR_RESOURCE="aigateways.components.platform.opendatahub.io"
 
 echo "Cleaning up integration test resources..."
 
@@ -23,8 +23,8 @@ kubectl delete roles --all -n "${NAMESPACE}" --ignore-not-found 2>/dev/null || t
 kubectl delete rolebindings --all -n "${NAMESPACE}" --ignore-not-found 2>/dev/null || true
 
 # Delete cluster-scoped resources created by the controller
-kubectl delete clusterroles -l platform.opendatahub.io/part-of=ray --ignore-not-found 2>/dev/null || true
-kubectl delete clusterrolebindings -l platform.opendatahub.io/part-of=ray --ignore-not-found 2>/dev/null || true
+kubectl delete clusterroles -l platform.opendatahub.io/part-of=aigateway --ignore-not-found 2>/dev/null || true
+kubectl delete clusterrolebindings -l platform.opendatahub.io/part-of=aigateway --ignore-not-found 2>/dev/null || true
 
 # Delete test RBAC
 kubectl delete clusterrole integration-test-role --ignore-not-found 2>/dev/null || true
