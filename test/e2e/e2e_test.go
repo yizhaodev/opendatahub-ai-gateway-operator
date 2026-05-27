@@ -159,6 +159,7 @@ func TestAIGateway(t *testing.T) {
 	t.Run("should have operator ConfigMap deployed", rt.testOperatorConfigMap)
 	t.Run("should become ready", rt.testBecomesReady)
 	t.Run("should deploy batch-gateway operator", rt.testBatchGatewayDeployed)
+	t.Run("should show deployed resources", rt.testShowResources)
 	t.Run("should report module version and platform", rt.testModuleStatus)
 	t.Run("should set platform labels on workload", rt.testPlatformLabels)
 	t.Run("should set owner references on workload", rt.testOwnerReferences)
@@ -220,6 +221,39 @@ func (rt *aiGatewayE2ETest) testModuleStatus(t *testing.T) {
 
 func (rt *aiGatewayE2ETest) testBatchGatewayDeployed(t *testing.T) {
 	eventuallyDeploymentReady(t, rt.workloadDeploy)
+}
+
+func (rt *aiGatewayE2ETest) testShowResources(t *testing.T) {
+	g := NewWithT(t)
+	ns := rt.operatorDeploy.Namespace
+
+	var deployList appsv1.DeploymentList
+	g.Expect(k8sClient.List(ctx, &deployList, client.InNamespace(ns))).To(Succeed())
+
+	t.Logf("Deployments in %s:", ns)
+	for i := range deployList.Items {
+		d := &deployList.Items[i]
+		t.Logf("  %-50s ready=%d/%d image=%s",
+			d.Name,
+			d.Status.ReadyReplicas,
+			*d.Spec.Replicas,
+			d.Spec.Template.Spec.Containers[0].Image,
+		)
+	}
+
+	var podList corev1.PodList
+	g.Expect(k8sClient.List(ctx, &podList, client.InNamespace(ns))).To(Succeed())
+
+	t.Logf("Pods in %s:", ns)
+	for i := range podList.Items {
+		p := &podList.Items[i]
+		phase := string(p.Status.Phase)
+		t.Logf("  %-50s %s  node=%s",
+			p.Name,
+			phase,
+			p.Spec.NodeName,
+		)
+	}
 }
 
 func (rt *aiGatewayE2ETest) testPlatformLabels(t *testing.T) {
