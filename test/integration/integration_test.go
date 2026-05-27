@@ -207,8 +207,9 @@ func runTestMain(m *testing.M) int {
 }
 
 type aiGatewayTest struct {
-	module    *componentsv1alpha1.AIGateway
-	moduleCRD *apiextensionsv1.CustomResourceDefinition
+	module         *componentsv1alpha1.AIGateway
+	moduleCRD      *apiextensionsv1.CustomResourceDefinition
+	workloadDeploy *appsv1.Deployment
 }
 
 func TestAIGateway(t *testing.T) {
@@ -226,6 +227,12 @@ func TestAIGateway(t *testing.T) {
 		moduleCRD: &apiextensionsv1.CustomResourceDefinition{
 			ObjectMeta: metav1.ObjectMeta{Name: moduleCRDName},
 		},
+		workloadDeploy: &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "batch-gw-operator-controller-manager",
+				Namespace: support.IntegrationTestNamespace(),
+			},
+		},
 	}
 
 	_ = k8sClient.Delete(ctx, rt.module)
@@ -237,7 +244,9 @@ func TestAIGateway(t *testing.T) {
 
 	t.Run("should have module CRD installed", rt.testModuleCRDInstalled)
 	t.Run("should become ready", rt.testBecomesReady)
+	t.Run("should deploy batch-gateway operator", rt.testBatchGatewayDeployed)
 	t.Run("should report module version and platform", rt.testModuleStatus)
+	t.Run("should set owner references on workload", rt.testOwnerReferences)
 }
 
 func (rt *aiGatewayTest) testModuleCRDInstalled(t *testing.T) {
@@ -276,6 +285,23 @@ func (rt *aiGatewayTest) testModuleStatus(t *testing.T) {
 		jq.Match(`.status.module.sources[0].path != ""`),
 		jq.Match(`.status.module.sources[0].renderer == "kustomize"`),
 	))
+}
+
+func (rt *aiGatewayTest) testBatchGatewayDeployed(t *testing.T) {
+	g := NewWithT(t)
+
+	g.Eventually(k.Get(rt.workloadDeploy)).WithContext(ctx).WithTimeout(timeout).WithPolling(interval).Should(
+		jq.Match(`.status.readyReplicas >= 1`),
+	)
+}
+
+func (rt *aiGatewayTest) testOwnerReferences(t *testing.T) {
+	g := NewWithT(t)
+
+	g.Eventually(k.Get(rt.workloadDeploy)).WithContext(ctx).WithTimeout(timeout).WithPolling(interval).Should(
+		jq.Match(`.metadata.ownerReferences[] | select(.kind == "AIGateway") | .name == "%s"`,
+			componentsv1alpha1.AIGatewayInstanceName),
+	)
 }
 
 func waitForDeleted(t *testing.T, obj client.Object) {

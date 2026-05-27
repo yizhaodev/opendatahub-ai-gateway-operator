@@ -158,7 +158,10 @@ func TestAIGateway(t *testing.T) {
 	t.Run("should have module CRD installed", rt.testModuleCRDInstalled)
 	t.Run("should have operator ConfigMap deployed", rt.testOperatorConfigMap)
 	t.Run("should become ready", rt.testBecomesReady)
+	t.Run("should deploy batch-gateway operator", rt.testBatchGatewayDeployed)
 	t.Run("should report module version and platform", rt.testModuleStatus)
+	t.Run("should set platform labels on workload", rt.testPlatformLabels)
+	t.Run("should set owner references on workload", rt.testOwnerReferences)
 }
 
 func (rt *aiGatewayE2ETest) testModuleCRDInstalled(t *testing.T) {
@@ -213,6 +216,46 @@ func (rt *aiGatewayE2ETest) testModuleStatus(t *testing.T) {
 		jq.Match(`.status.module.sources[0].path != ""`),
 		jq.Match(`.status.module.sources[0].renderer == "kustomize"`),
 	))
+}
+
+func (rt *aiGatewayE2ETest) testBatchGatewayDeployed(t *testing.T) {
+	eventuallyDeploymentReady(t, rt.workloadDeploy)
+}
+
+func (rt *aiGatewayE2ETest) testPlatformLabels(t *testing.T) {
+	g := NewWithT(t)
+	module := rt.module.DeepCopy()
+	operatorCfg := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      operatorConfigMapName,
+			Namespace: support.OperatorNamespace(),
+		},
+	}
+
+	g.Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(module), module)).To(Succeed())
+	g.Expect(k8sClient.Get(ctx, client.ObjectKeyFromObject(operatorCfg), operatorCfg)).To(Succeed())
+
+	g.Eventually(k.Get(rt.workloadDeploy)).WithContext(ctx).WithTimeout(timeout).WithPolling(interval).Should(And(
+		jq.Match(`.metadata.labels."%s" == "aigateway"`, labelPartOf),
+		jq.Match(`.metadata.annotations."%s" == "%s"`,
+			annotationInstanceName,
+			module.GetName()),
+		jq.Match(`.metadata.annotations."%s" == "%s"`,
+			annotationInstanceUID,
+			string(module.GetUID())),
+		jq.Match(`.metadata.annotations."%s" == "%s"`,
+			annotationType,
+			operatorCfg.Data[moduleconfig.KeyPlatformType]),
+	))
+}
+
+func (rt *aiGatewayE2ETest) testOwnerReferences(t *testing.T) {
+	g := NewWithT(t)
+
+	g.Eventually(k.Get(rt.workloadDeploy)).WithContext(ctx).WithTimeout(timeout).WithPolling(interval).Should(
+		jq.Match(`.metadata.ownerReferences[] | select(.kind == "AIGateway") | .name == "%s"`,
+			componentsv1alpha1.AIGatewayInstanceName),
+	)
 }
 
 func waitForDeleted(t *testing.T, obj client.Object) {

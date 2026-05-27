@@ -10,7 +10,7 @@ SOURCE_PATH="config"
 DST_MANIFESTS_DIR="${PROJECT_ROOT}/config/manifests/${COMPONENT_NAME}"
 
 REPO_URL="https://github.com/opendatahub-io/${REPO_NAME}"
-COMMIT_SHA="HEAD"
+COMMIT_SHA="42fc1a7f9d4efc00606e97c1f0ca7a40c2704dea"
 
 if [[ "${USE_LOCAL:-}" == "true" ]] && [[ -d "${PROJECT_ROOT}/../${REPO_NAME}" ]]; then
     echo "Copying manifests from adjacent ${REPO_NAME} checkout"
