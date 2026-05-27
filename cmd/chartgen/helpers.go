@@ -67,7 +67,7 @@ Canonical image reference. Prefer fullRef when explicitly set.
 
 const chartYAMLTemplate = `apiVersion: v2
 name: %s
-description: ODH Ray Operator Helm chart
+description: ODH AI Gateway Operator Helm chart
 version: %s
 appVersion: "%s"
 type: application
