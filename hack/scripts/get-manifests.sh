@@ -38,4 +38,5 @@ sed -i.bak 's|BATCH_GATEWAY_OPERATOR_IMAGE=.*|BATCH_GATEWAY_OPERATOR_IMAGE=ghcr.
     "${DST_MANIFESTS_DIR}/base/params.env"
 rm -f "${DST_MANIFESTS_DIR}/base/params.env.bak"
 
+
 echo "Manifests downloaded to ${DST_MANIFESTS_DIR}"
