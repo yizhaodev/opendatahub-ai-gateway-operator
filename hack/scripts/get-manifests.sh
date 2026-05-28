@@ -9,11 +9,8 @@ REPO_NAME="llm-d-batch-gateway-operator"
 SOURCE_PATH="config"
 DST_MANIFESTS_DIR="${PROJECT_ROOT}/config/manifests/${COMPONENT_NAME}"
 
-# TODO: revert to opendatahub-io once upstream PR merges
-REPO_URL="https://github.com/yizhaodev/${REPO_NAME}"
-COMMIT_SHA="54a910a62c1c3716b2566d784d83dcb8ad538e70"
-#REPO_URL="https://github.com/opendatahub-io/${REPO_NAME}"
-#COMMIT_SHA="e762e41d88fc128d0911f5811a945573ce87d1ea"
+REPO_URL="https://github.com/opendatahub-io/${REPO_NAME}"
+COMMIT_SHA="c426eeb4dc90e9ac694fa31ea20a7354c593a94e"
 
 if [[ "${USE_LOCAL:-}" == "true" ]] && [[ -d "${PROJECT_ROOT}/../${REPO_NAME}" ]]; then
     echo "Copying manifests from adjacent ${REPO_NAME} checkout"
