@@ -9,8 +9,11 @@ REPO_NAME="llm-d-batch-gateway-operator"
 SOURCE_PATH="config"
 DST_MANIFESTS_DIR="${PROJECT_ROOT}/config/manifests/${COMPONENT_NAME}"
 
-REPO_URL="https://github.com/opendatahub-io/${REPO_NAME}"
-COMMIT_SHA="e762e41d88fc128d0911f5811a945573ce87d1ea"
+# TODO: revert to opendatahub-io once upstream PR merges
+REPO_URL="https://github.com/yizhaodev/${REPO_NAME}"
+COMMIT_SHA="54a910a62c1c3716b2566d784d83dcb8ad538e70"
+#REPO_URL="https://github.com/opendatahub-io/${REPO_NAME}"
+#COMMIT_SHA="e762e41d88fc128d0911f5811a945573ce87d1ea"
 
 if [[ "${USE_LOCAL:-}" == "true" ]] && [[ -d "${PROJECT_ROOT}/../${REPO_NAME}" ]]; then
     echo "Copying manifests from adjacent ${REPO_NAME} checkout"
@@ -32,14 +35,6 @@ git -C "${TMP_DIR}" reset -q --hard FETCH_HEAD
 rm -rf "${DST_MANIFESTS_DIR}"
 mkdir -p "${DST_MANIFESTS_DIR}"
 cp -a "${TMP_DIR}/${SOURCE_PATH}/." "${DST_MANIFESTS_DIR}/"
-
-# TODO
-# Fix upstream name mismatch: ClusterRole "manager-role" must match
-# ClusterRoleBinding roleRef "batch-gateway-operator-manager-role".
-# The default/ overlay applies namePrefix but base/ does not.
-sed -i.bak 's/name: manager-role/name: batch-gateway-operator-manager-role/' \
-    "${DST_MANIFESTS_DIR}/rbac/role.yaml"
-rm -f "${DST_MANIFESTS_DIR}/rbac/role.yaml.bak"
 
 # TODO: remove once quay.io/opendatahub/odh-batch-gateway-operator is published
 sed -i.bak 's|BATCH_GATEWAY_OPERATOR_IMAGE=.*|BATCH_GATEWAY_OPERATOR_IMAGE=ghcr.io/opendatahub-io/batch-gateway-operator:main|' \
