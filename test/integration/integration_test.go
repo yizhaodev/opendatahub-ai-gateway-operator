@@ -230,7 +230,7 @@ func TestAIGateway(t *testing.T) {
 		},
 		workloadDeploy: &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      "batch-gateway-operator-controller-manager",
+				Name:      "batch-gateway-operator",
 				Namespace: support.IntegrationTestNamespace(),
 			},
 		},
